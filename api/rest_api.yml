@@ -663,7 +663,7 @@ paths:
            schema:
                 type: array
                 items: 
-                  $ref: '#/components/schemas/CommentRead'
+                  $ref: '#/components/schemas/Comment'
       responses:
         '200':
           description: Комментарий на путешествие создан
@@ -814,15 +814,6 @@ paths:
             enum:
               - subscriptions
               - best_trips
-        - name: filterType
-          in: query
-          description: Тип сортировки путешествий при необходимости
-          required: false
-          schema:
-            type: string
-            enum:
-              - by_time
-              - by_mark
         - name: limit
           in: query
           description: Максимальное количество объектов в ответе
