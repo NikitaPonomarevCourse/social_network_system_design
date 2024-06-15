@@ -22,6 +22,8 @@ tags:
     description: Методы, связанные с лентой путешествий
   - name: places
     description: Методы, связанные с местами путешествий
+  - name: images
+    description: Методы, связанные с работой с изображениями
 paths:
   /api/v1/account:
     post:
@@ -958,7 +960,58 @@ paths:
           description: Неправильный запрос на получение мест путешествий
         '500':
           description: Внутренняя ошибка сервера
-
+  /api/v1/image/:
+    post:
+      tags:
+        - images
+      summary: Загружает изображение на статику
+      description: Загружает изображение на статику
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Изображение успешно загружено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: url
+                    description: URL, по которому можно получить загруженное изображение
+        '400':
+          description: Неверный запрос или формат изображения
+        '500':
+          description: Внутренняя ошибка сервера
+  /api/v1/image/{imageID}:
+    delete:
+      tags:
+        - images
+      summary: Удаляет изображение со статики
+      description: Удаляет изображение со статики
+      parameters:
+        - in: path
+          name: imageID
+          required: true
+          schema:
+            type: string
+          description: ID изображения для удаления 
+      responses:
+        '200':
+          description: Изображение успешно удалено
+        '400':
+          description: Неверный запрос или формат изображения
+        '500':
+          description: Внутренняя ошибка сервера
 components:
   securitySchemes:
     Bearer:
@@ -1042,6 +1095,7 @@ components:
           type: boolean
         images:
           type: array
+          description: 'url изображений'
           items:
             type: string
         country:
@@ -1085,6 +1139,7 @@ components:
           type: boolean
         images:
           type: array
+          description: 'url изображений'
           items:
             type: string
         country:
