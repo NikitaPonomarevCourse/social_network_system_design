@@ -8,24 +8,24 @@ tags:
     description: Методы, связанные с аккаунтами
   - name: subscriptions
     description: Методы, связанные с подписками
-  - name: dialogues
-    description: Методы, связанные с диалогами
+  - name: chats
+    description: Методы, связанные с чатами
   - name: messages
     description: Методы, связанные с сообщениями
-  - name: trips
-    description: Методы, связанные с путешествиями
+  - name: posts
+    description: Методы, связанные с постами путешествий
   - name: marks
     description: Методы, связанные с получением оценок путешествий
   - name: comments
     description: Методы, связанные с комментариями к путешествием
-  - name: feed
+  - name: feeds
     description: Методы, связанные с лентой путешествий
   - name: places
     description: Методы, связанные с местами путешествий
   - name: images
     description: Методы, связанные с работой с изображениями
 paths:
-  /api/v1/account:
+  /api/v1/accounts:
     post:
       tags:
         - accounts
@@ -86,7 +86,7 @@ paths:
           description: Аккаунт удален
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/account/{accountID}:
+  /api/v1/accounts/{accountID}:
     get:
       tags:
         - accounts
@@ -122,7 +122,7 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/subscription/{accountID}:
+  /api/v1/subscriptions/{accountID}:
     post:  
       tags:
         - subscriptions
@@ -210,32 +210,90 @@ paths:
                   $ref: '#/components/schemas/AccountRead'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/dialogues/{accountID}:
+  /api/v1/chats/:
     post:
       tags:
-        - dialogues
-      summary: Создает диалог с аккаутом по ID
-      description: Создает диалог с аккаутом по ID
-      parameters:
-        - in: path
-          name: accountID
-          required: true
-          schema:
-            type: string
-          description: ID аккаунта для создания диалога
+        - chats
+      summary: Создает чат с аккаутами по их ID
+      description: Создает чат с аккаутом по ID
+      requestBody:
+        description: Список accountID для создания чата
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+              
       security:
         - Bearer: []
       responses:
         '200':
-          description: Диалог создан
+          description: Чат создан
         '400':
-          description: Неправильный запрос на создание диалога
+          description: Неправильный запрос на создание чата
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Аккаунт для создания диалога не найден
+          description: Аккаунт для создания чата не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервиса
+  /api/v1/chats/{chatID}:
+    get:
+      tags:
+        - chats
+      summary: Получает чат по его ID
+      description: Получает чат по его ID
+      parameters:
+        - in: path
+          name: chatID
+          required: true
+          schema:
+            type: string
+          description: ID чата
+        - name: limit
+          in: query
+          description: Максимальное количество сообщений в чате в ответе
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: offset
+          in: query
+          description: Смещение от начала списка сообщений в чате
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: Чат получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatRead'
+        '400':
+          description: Неправильный запрос на получение чата
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Чат не найден
           content:
             application/json:
               schema:
@@ -244,29 +302,29 @@ paths:
           description: Внутренняя ошибка сервиса
     delete:
       tags:
-        - dialogues
-      summary: Удаляет диалог с аккаутом по ID
-      description: Удаляет диалог с аккаутом по ID
+        - chats
+      summary: Удаляет чат по ID
+      description: Удаляет чат по ID
       parameters:
         - in: path
-          name: accountID
+          name: chatID
           required: true
           schema:
             type: string
-          description: ID аккаунта для удаления диалога
+          description: ID для удаления чата
       security:
         - Bearer: []
       responses:
         '200':
-          description: Диалог удален
+          description: Чат удален
         '400':
-          description: Неправильный запрос на удаление диалога
+          description: Неправильный запрос на удаление чата
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Диалог с аккаунтом не найден
+          description: Чат с аккаунтом не найден
           content:
             application/json:
               schema:
@@ -276,9 +334,9 @@ paths:
   /api/v1/dialogues:
     get:
       tags:
-        - dialogues
-      summary: Получает все диалоги
-      description: Получает все диалоги для текущего аккаунта
+        - chats
+      summary: Получает все чаты
+      description: Получает все чаты для текущего аккаунта
       parameters:
         - name: limit
           in: query
@@ -301,16 +359,17 @@ paths:
         - Bearer: []
       responses:
         '200':
-          description: Диалоги найдены
+          description: Чати найдены
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AccountRead'
+                  type: string
+                  description: "id чатов"
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/message/{accountID}:
+  /api/v1/messages/{accountID}:
     post:
       tags:
         - messages
@@ -349,7 +408,6 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/messages/{accountID}:
     get:
       tags:
         - messages
@@ -392,19 +450,21 @@ paths:
                   $ref: '#/components/schemas/MessageRead'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/trip/:
+  /api/v1/posts/:
     post:
       tags:
-        - trips
+        - posts
       summary: Создает путешествие
       description: Создает путешествие
+      security:
+        - Bearer: []
       requestBody:
         description: Данные для создания путешествия
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Trip'
+              $ref: '#/components/schemas/Post'
       responses:
         '200':
           description: Путешествие создан
@@ -416,26 +476,28 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/trip/{tripID}:
+  /api/v1/posts/{postID}:
     put:
       tags:
-        - trips
+        - posts
       summary: Обновляет путешествиe
       description: Создает путешествиe
       parameters:
         - in: path
-          name: tripID
+          name: postID
           required: true
           schema:
             type: string
           description: ID путешествия для обновления 
+      security:
+        - Bearer: []
       requestBody:
         description: Данные для обновления путешествия
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Trip'
+              $ref: '#/components/schemas/Post'
       responses:
         '200':
           description: Путешествие создан
@@ -449,16 +511,18 @@ paths:
           description: Внутренняя ошибка сервиса
     delete:
       tags:
-        - trips
+        - posts
       summary: Удаляет путешествие
       description: Удаляет путешествие
       parameters:
         - in: path
-          name: tripID
+          name: postID
           required: true
           schema:
             type: string
           description: ID путешествия для удаления 
+      security:
+        - Bearer: []
       responses:
         '200':
           description: Путешествие удален
@@ -472,12 +536,14 @@ paths:
           description: Внутренняя ошибка сервиса
     get: 
       tags:
-        - trips
+        - posts
       summary: Получает путешествие
       description: Получение путешествия по его ID
+      security:
+        - Bearer: []
       parameters:
         - in: path
-          name: tripID
+          name: postID
           required: true
           schema:
             type: string
@@ -488,7 +554,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TripRead'
+                $ref: '#/components/schemas/PostRead'
         '404':
           description: Путешествие не найдено
           content:
@@ -497,12 +563,14 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/trips/{accountID}:
+  /api/v1/posts/{accountID}:
     get: 
       tags:
-        - trips
+        - posts
       summary: Получает путешествия пользователя
       description: Получение всех путешествий пользователя по его ID
+      security:
+        - Bearer: []
       parameters:
         - in: path
           name: accountID
@@ -544,7 +612,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TripRead'
+                  $ref: '#/components/schemas/PostRead'
         '404':
           description: Пользователь не найден
           content:
@@ -553,15 +621,17 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/trip/{tripID}/mark:
+  /api/v1/posts/{postID}/mark:
     post:
       tags:
         - marks
       summary: Создает оценку на путешествие
       description: Создает оценку на путешествие
+      security:
+        - Bearer: []
       parameters:
         - in: path
-          name: tripID
+          name: postID
           required: true
           schema:
             type: string
@@ -581,15 +651,17 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/trip/{tripID}/mark/{markID}:
+  /api/v1/posts/{postID}/marks/{markID}:
     put:
       tags:
         - marks
       summary: Обновляет оценку на путешествие
       description: Обновляет оценку на путешествие
+      security:
+        - Bearer: []
       parameters:
         - in: path
-          name: tripID
+          name: postID
           required: true
           schema:
             type: string
@@ -620,9 +692,11 @@ paths:
         - marks
       summary: Удаляет оценку с путешествия
       description: Удаляет оценку с путешествия
+      security:
+        - Bearer: []
       parameters:
         - in: path
-          name: tripID
+          name: postID
           required: true
           schema:
             type: string
@@ -644,15 +718,17 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/trip/{tripID}/comment:
+  /api/v1/posts/{postID}/comment:
     post:
       tags:
         - comments
       summary: Создает комментарий к путешествию
       description: Создает комментарий к путешествию
+      security:
+        - Bearer: []
       parameters:
         - in: path
-          name: tripID
+          name: postID
           required: true
           schema:
             type: string
@@ -677,15 +753,17 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/trip/{tripID}/comment/{commentID}:
+  /api/v1/posts/{postID}/comment/{commentID}:
     put:
       tags:
         - comments
       summary: Обновляет комментарий к путешествию
       description: Обновляет комментарий к путешествию
+      security:
+        - Bearer: []
       parameters:
         - in: path
-          name: tripID
+          name: postID
           required: true
           schema:
             type: string
@@ -721,9 +799,11 @@ paths:
         - comments
       summary: Удаляет комментарий от путешествия
       description: Удаляет комментарий от путешествия
+      security:
+        - Bearer: []
       parameters:
         - in: path
-          name: tripID
+          name: postID
           required: true
           schema:
             type: string
@@ -745,15 +825,17 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/trip/{tripID}/comments:
+  /api/v1/posts/{postID}/comments:
     get:
       tags:
         - comments
       summary: Получает комментарии к путешествию
       description: Получает комментарии к путешествию
+      security:
+        - Bearer: []
       parameters:
         - in: path
-          name: tripID
+          name: postID
           required: true
           schema:
             type: string
@@ -790,12 +872,14 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/feed/:
+  /api/v1/feeds/:
     get: 
       tags:
-        - feed
+        - feeds
       summary: Получает путешествия подписок/лучшие за период среди всех 
       description: Получает путешествия подписок/лучшие за период среди всех 
+      security:
+        - Bearer: []
       parameters:
         - name: interval
           in: query
@@ -815,7 +899,7 @@ paths:
             type: string
             enum:
               - subscriptions
-              - best_trips
+              - best_posts
         - name: limit
           in: query
           description: Максимальное количество объектов в ответе
@@ -841,7 +925,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TripRead'
+                  $ref: '#/components/schemas/PostRead'
         '400':
           description: Ошибка в запросе
           content:
@@ -856,6 +940,8 @@ paths:
         - places
       summary: Получает оценок мест путешествий 
       description: Получает оценки мест путешествий 
+      security:
+        - Bearer: []
       parameters:
         - name: interval
           in: query
@@ -924,6 +1010,8 @@ paths:
       tags:
         - places
       summary: Получить координаты мест путешествий на карте
+      security:
+        - Bearer: []
       parameters:
         - name: startDate
           in: query
@@ -960,12 +1048,14 @@ paths:
           description: Неправильный запрос на получение мест путешествий
         '500':
           description: Внутренняя ошибка сервера
-  /api/v1/image/:
+  /api/v1/images/:
     post:
       tags:
         - images
       summary: Загружает изображение на статику
       description: Загружает изображение на статику
+      security:
+        - Bearer: []
       requestBody:
         required: true
         content:
@@ -992,12 +1082,14 @@ paths:
           description: Неверный запрос или формат изображения
         '500':
           description: Внутренняя ошибка сервера
-  /api/v1/image/{imageID}:
+  /api/v1/images/{imageID}:
     delete:
       tags:
         - images
       summary: Удаляет изображение со статики
       description: Удаляет изображение со статики
+      security:
+        - Bearer: []
       parameters:
         - in: path
           name: imageID
@@ -1064,6 +1156,27 @@ components:
           type: string
         text:
           type: string
+    ChatRead:
+      type: object
+      properties:
+        accountIDs:
+          type: array
+          items: 
+            type: string
+        messages:
+          type: array
+          items: 
+            $ref: '#/components/schemas/MessageChatRead'
+    MessageChatRead:
+      type: object
+      properties:
+        author:
+          type: string
+        text:
+          type: string
+        date:
+          type: string
+          format: date
     MessageRead:
       type: object
       properties:
@@ -1072,7 +1185,7 @@ components:
         date:
           type: string
           format: date
-    Trip:
+    Post:
       type: object
       properties:
         name:
@@ -1108,12 +1221,12 @@ components:
         end_date:
           type: string
           format: date
-    TripRead:
+    PostRead:
       type: object
       properties:
         account_id:
           type: string
-        trip_id:
+        post_id:
           type: string
         name:
           type: string
@@ -1191,7 +1304,7 @@ components:
           type: string
         median_mark: 
           type: number
-        trips_cnt: 
+        posts_cnt: 
           type: number
     Error:
       type: object
