@@ -10,8 +10,6 @@ tags:
     description: Методы, связанные с подписками
   - name: chats
     description: Методы, связанные с чатами
-  - name: messages
-    description: Методы, связанные с сообщениями
   - name: posts
     description: Методы, связанные с постами путешествий
   - name: marks
@@ -210,21 +208,19 @@ paths:
                   $ref: '#/components/schemas/AccountRead'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/chats/:
+  /api/v1/chats:
     post:
       tags:
         - chats
-      summary: Создает чат с аккаутами по их ID
-      description: Создает чат с аккаутом по ID
+      summary: Создает чат с аккаунтами по их ID
+      description: Создает чат с аккаунтом по ID
       requestBody:
         description: Список accountID для создания чата
         required: true
         content:
           application/json:
             schema:
-              type: array
-              items:
-                type: string
+              $ref: '#/components/schemas/ChatCreate'
               
       security:
         - Bearer: []
@@ -243,6 +239,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервиса
+    get:
+      tags:
+        - chats
+      summary: Получает все чаты
+      description: Получает все чаты для текущего аккаунта
+      parameters:
+        - name: limit
+          in: query
+          description: Максимальное количество объектов в ответе
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: offset
+          in: query
+          description: Смещение от начала списка объектов
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: Чати найдены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: "id чатов"
         '500':
           description: Внутренняя ошибка сервиса
   /api/v1/chats/{chatID}:
@@ -331,57 +364,19 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/dialogues:
-    get:
-      tags:
-        - chats
-      summary: Получает все чаты
-      description: Получает все чаты для текущего аккаунта
-      parameters:
-        - name: limit
-          in: query
-          description: Максимальное количество объектов в ответе
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 10
-        - name: offset
-          in: query
-          description: Смещение от начала списка объектов
-          required: false
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
-      security:
-        - Bearer: []
-      responses:
-        '200':
-          description: Чати найдены
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-                  description: "id чатов"
-        '500':
-          description: Внутренняя ошибка сервиса
-  /api/v1/messages/{accountID}:
+  /api/v1/chats/{chatID}/messages:
     post:
       tags:
-        - messages
+        - chats
       summary: Посылка сообщения
       description: Посылает сообщение пользователю с аккаутом ID
       parameters:
         - in: path
-          name: accountID
+          name: chatID
           required: true
           schema:
             type: string
-          description: ID аккаунта для посылки сообщения 
+          description: ID чата для отправки сообщения
       requestBody:
         description: Данные для посылки сообщения
         required: true
@@ -408,49 +403,7 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-    get:
-      tags:
-        - messages
-      summary: Получение сообщений
-      description: Получение сообщения от пользователя с аккаутом ID
-      parameters:
-        - in: path
-          name: accountID
-          required: true
-          schema:
-            type: string
-          description: ID аккаунта для получения сообщений
-        - name: limit
-          in: query
-          description: Максимальное количество объектов в ответе
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 10
-        - name: offset
-          in: query
-          description: Смещение от начала списка объектов
-          required: false
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
-      security:
-        - Bearer: []
-      responses:
-        '200':
-          description: Сообщения получены
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/MessageRead'
-        '500':
-          description: Внутренняя ошибка сервиса
-  /api/v1/posts/:
+  /api/v1/posts:
     post:
       tags:
         - posts
@@ -872,7 +825,7 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
-  /api/v1/feeds/:
+  /api/v1/feeds:
     get: 
       tags:
         - feeds
@@ -1048,7 +1001,7 @@ paths:
           description: Неправильный запрос на получение мест путешествий
         '500':
           description: Внутренняя ошибка сервера
-  /api/v1/images/:
+  /api/v1/images:
     post:
       tags:
         - images
@@ -1156,6 +1109,15 @@ components:
           type: string
         text:
           type: string
+    ChatCreate:
+      type: object
+      properties:
+        accountIDs:
+          type: array
+          items: 
+            type: string
+        name:
+          type: string
     ChatRead:
       type: object
       properties:
@@ -1163,6 +1125,8 @@ components:
           type: array
           items: 
             type: string
+        name:
+          type: string
         messages:
           type: array
           items: 
@@ -1265,6 +1229,7 @@ components:
         end_date:
           type: string
           format: date
+    
     Mark:
       type: object
       properties:
