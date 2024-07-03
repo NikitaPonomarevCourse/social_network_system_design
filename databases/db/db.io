@@ -1,3 +1,4 @@
+
 Table users {
 	user_id serial [primary key, increment]
 	username varchar(50) [not null]
@@ -9,7 +10,6 @@ Table users {
   }
   
   Table subscriptions {
-    subscribtion_id bigserial [primary key]
 	account_id integer [ref: > users.user_id]
 	subscriber_id integer [ref: > users.user_id]
 	created_at timestamp
@@ -18,9 +18,15 @@ Table users {
   Table chats {
 	chat_id serial [primary key]
 	name varchar(100) [not null]
-	created_at timestamp [ref: > users.user_id]
-	users "[]integer" [not null, ref: > users.user_id]
+	created_by integer [ref: > users.user_id]
   }
+
+  Table chats_members {
+    chat_id serial [ref: > chats.chat_id]
+    user_id integer [ref: > users.user_id]
+    is_read bool 
+  }
+  
   
   Table chats_messages {
 	message_id bigserial [primary key]
@@ -28,14 +34,13 @@ Table users {
 	message string [not null]
 	creator_id integer [ref: > users.user_id]
 	created_at timestamp
-  is_read bool
   }
   
   Table posts {
 	post_id serial [primary key]
 	name varchar(100) [not null]
 	body varchar(5000) 
-	coordinates varchar(100) 
+	coordinates varchar(100) [note: "Example: '37°46' N 122°25' W, ISO 6709:2008"]
 	created_by integer [ref: > users.user_id]
 	is_private bool
 	city varchar(100) [ref: <> places.city]
@@ -50,6 +55,7 @@ Table users {
     post_id serial [ref: > posts.post_id]
     text varchar(500) [not null]
     created_by integer [ref: > users.user_id]
+    repty_to serial [ref: > comments.comment_id]
     created_at timestamp
   }
   
