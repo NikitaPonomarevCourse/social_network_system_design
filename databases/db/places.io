@@ -1,0 +1,8 @@
+ Table places {
+    place_id serial [primary key]
+    city varchar(100)
+	  country varchar(100) 
+    name varchar(100) [not null]
+    created_at timestamp
+  }
+  
