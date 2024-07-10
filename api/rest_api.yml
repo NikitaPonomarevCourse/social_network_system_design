@@ -221,7 +221,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ChatCreate'
-              
+
       security:
         - Bearer: []
       responses:
@@ -1229,7 +1229,7 @@ components:
         end_date:
           type: string
           format: date
-    
+
     Mark:
       type: object
       properties:
