@@ -7,7 +7,7 @@
   Table chats_members {
     chat_id serial [ref: > chats.chat_id]
     user_id integer 
-    is_read bool 
+    last_read_message_id bigserial [ref: > chats_messages.message_id] 
   }
   
   
@@ -18,6 +18,4 @@
 	creator_id integer 
 	created_at timestamp
   }
-  
-
   
