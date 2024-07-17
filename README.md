@@ -51,7 +51,7 @@
     </br><b>Level 1.</b> System context diagram</br></br>
 </p>
 <p align="center">
-  <img src="arch/context.png" />
+  <img src="arch/context.svg" />
 </p>
 
 ## Расчет нагрузки и трафика данных
