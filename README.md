@@ -54,6 +54,13 @@
   <img src="arch/context.svg" />
 </p>
 
+<p align="center">
+    </br><b>Level 2.</b> System container diagram</br></br>
+</p>
+<p align="center">
+  <img src="arch/container.svg" />
+</p>
+
 ## Расчет нагрузки и трафика данных
   - Будем использовать символы в кодировке utf-8 для поддержки языков стран СНГ и эмоджи:
       https://stackoverflow.com/questions/3662688/is-there-a-languages-which-will-require-three-or-more-bytes-per-character-when
