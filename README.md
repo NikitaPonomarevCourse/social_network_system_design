@@ -58,7 +58,7 @@
     </br><b>Level 2.</b> System container diagram</br></br>
 </p>
 <p align="center">
-  <img src="arch/containe.svg" />
+  <img src="arch/container.svg" />
 </p>
 
 ## Расчет нагрузки и трафика данных
