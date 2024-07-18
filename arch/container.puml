@@ -1,7 +1,9 @@
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
+skinparam linetype polyline
 LAYOUT_WITH_LEGEND()
+LAYOUT_LANDSCAPE()
 
 Person(user, "User")
 
