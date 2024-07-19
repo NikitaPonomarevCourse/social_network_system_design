@@ -1,0 +1,74 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+LAYOUT_LANDSCAPE()
+
+Person(user, "User")
+
+System_Boundary(coreSystem, "Core system") {
+    Container(loadBalancer, "Load Balancer", "Nginx", "Uses round robin")
+    Container_Boundary(S3_container, "Photos container") {
+         Container(S3_service, "Photos manager", "Go", "Handle uploading and storing photos")
+         Container(S3_deliver, "Photos deliver", "Go", "Handle deliver of photos")
+         ContainerDb(S3_storage, "Photos DB", "S3", "Handle storing photos")
+
+         Rel(S3_service, S3_storage, "Upload and delete photos", "REST")
+         Rel(S3_deliver, S3_storage, "Get photos", "REST")
+    }
+    System_Boundary(SN_container, "Social Network container") {
+         Container(usersService, "User Service", "Go", "Handles work with user account info")
+         Container(chatsService, "Chat Service", "Go", "Handles work with chats")
+         Container(subscriptionsService, "Subscriptions Service", "Go", "Handles work with subscriptions")
+         Container(postsService, "Post Service", "Go", "Handles simple read/write operation with posts")
+         Container(placesService, "Places Service", "Go", "Handles with places and tops of places")
+         Container(feedService, "Feed Service", "Go", "Handles work with feed")
+         Container(feedGeneratorService, "Handle generating of feed", "Go", "Worker that generate feed")
+         Container(rateService, "Rate Service", "Go", "Handles work with feed")
+         Container(commentsService, "Comments Service", "Go", "Handles work with comments")
+         Container(placesGeneratorService, "Handle generating of places", "Go", "Worker that generate places")
+         Container(topPlacesGeneratorService, "Handle generating tops of places", "Go", "Worker that generate tops of places")
+
+         ContainerDb(usersDB, "Users DB", "PgSQL", "Stores user information")
+         ContainerDb(subscriptionsDB, "Subscriptions DB", "PgSQL", "Stores user subscriptions")
+         ContainerDb(chatsDB, "Chats DB", "PgSQL", "Stores chat information")
+         ContainerDb(postsDB, "Posts DB", "PgSQL", "Stores post information")
+         ContainerDb(feedsDB, "Feeds cache", "Redis", "Stores feed cache")
+         ContainerDb(topsPlacesDB, "Tops Places cache", "Redis", "Stores tops places cache")
+         ContainerDb(placesDB, "Places DB", "Redis", "Stores places")
+
+         ContainerQueue(postsQueue, "Posts", "Kafka", "Stores posts")
+
+         Rel(usersService, usersDB, "Work with user account", "REST")
+         Rel(subscriptionsService, subscriptionsDB, "Work with user subscriptions", "REST")
+         Rel(chatsService, chatsDB, "Work with chats", "REST")
+         Rel(postsService, postsDB, "Work with posts", "REST")
+         Rel(placesService, placesDB, "Get places", "REST")
+         Rel(placesService, topsPlacesDB, "Get tops of places", "REST")
+         Rel(postsService, postsQueue, "Write new/updated posts", "REST")
+         Rel(feedService, feedsDB, "Get feeds or write generated feed", "REST")
+         Rel(feedService, postsDB, "Generate feed if not found in cache", "REST")
+         Rel(feedGeneratorService, postsDB, "Get posts for feed generating", "REST")
+         Rel(feedGeneratorService, feedsDB, "Write generated feeds in cache", "REST")
+         Rel(rateService, postsDB, "Write/update/read post marks", "REST")
+         Rel(commentsService, postsDB, "Write/update/read post comments", "REST")
+         Rel(placesGeneratorService, postsQueue, "Read posts", "REST")
+         Rel(placesGeneratorService, placesDB, "Write new places", "REST")
+         Rel(topPlacesGeneratorService, postsQueue, "Read posts", "REST")
+         Rel(topPlacesGeneratorService, topsPlacesDB, "Write tops of places", "REST")
+    }
+
+    Rel(loadBalancer, S3_service, "Upload/delete photos requests", "REST")
+    Rel(loadBalancer, S3_deliver, "Get photos requests", "REST")
+    Rel(loadBalancer, usersService, "Work with user accounts", "REST")
+    Rel(loadBalancer, chatsService, "Work with chats", "REST")
+    Rel(loadBalancer, postsService, "Work with posts", "REST")
+    Rel(loadBalancer, feedService, "Work with feeds", "REST")
+    Rel(loadBalancer, rateService, "Work with marks", "REST")
+    Rel(loadBalancer, subscriptionsService, "Work with subscriptions", "REST")
+    Rel(loadBalancer, commentsService, "Work with comments", "REST")
+    Rel(loadBalancer, placesService, "Work with places and tops of places", "REST")
+}
+
+Rel(user, loadBalancer, "Creates posts, write messages, rate other posts and write comments", "REST")
+@enduml
